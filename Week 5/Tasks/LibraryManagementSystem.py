@@ -66,14 +66,30 @@ class Library:
         self.books = []
         self.users = []
         self.transactions = []
+        self.librarian_authenticated = False
+
+    def authenticate_librarian(self):
+        # Simple authentication mechanism; replace with a more secure method
+        password = input("Enter librarian password: ")
+        if password == "librarian_password":
+            self.librarian_authenticated = True
+            print("Librarian authenticated.")
+        else:
+            print("Authentication failed. Access denied.")
 
     def add_book(self, book):
-        self.books.append(book)
-        print(f"Book '{book.title}' added to the library.")
+        if self.librarian_authenticated:
+            self.books.append(book)
+            print(f"Book '{book.title}' added to the library.")
+        else:
+            print("Librarian not authenticated. Please authenticate to perform this action.")
 
     def register_user(self, user):
-        self.users.append(user)
-        print(f"User '{user.name}' registered with user ID: {user.user_id}.")
+        if self.librarian_authenticated:
+            self.users.append(user)
+            print(f"User '{user.name}' registered with user ID: {user.user_id}.")
+        else:
+            print("Librarian not authenticated. Please authenticate to perform this action.")
 
     def display_books(self):
         if not self.books:
@@ -117,7 +133,6 @@ class Library:
             for transaction in self.transactions:
                 transaction.display_transaction_details()
 
-
 def print_user_menu():
     print("\nUser Menu:")
     print("1. Borrow Book")
@@ -125,17 +140,15 @@ def print_user_menu():
     print("3. Display Available Books")
     print("4. Display User Details")
     print("5. Exit")
-
-
 def print_librarian_menu():
     print("\nLibrarian Menu:")
-    print("1. Add Book")
-    print("2. Register User")
-    print("3. Display Available Books")
-    print("4. Display Registered Users")
-    print("5. Generate Transaction Report")
-    print("6. Exit")
-
+    print("1. Authenticate Librarian")
+    print("2. Add Book")
+    print("3. Register User")
+    print("4. Display Available Books")
+    print("5. Display Registered Users")
+    print("6. Generate Transaction Report")
+    print("7. Exit")
 
 def main():
     library = Library()
@@ -181,41 +194,42 @@ def main():
                 print("User not found. Please register or try again.")
 
         elif user_type == 'librarian':
-            while True:
-                print_librarian_menu()
-                librarian_choice = input("Enter your choice (1-6): ")
+            library.authenticate_librarian()
 
-                if librarian_choice == "1":
+            while library.librarian_authenticated:
+                print_librarian_menu()
+                librarian_choice = input("Enter your choice (1-7): ")
+
+                if librarian_choice == "2":
                     title = input("Enter the book title: ")
                     author = input("Enter the author: ")
                     isbn = input("Enter the ISBN: ")
                     new_book = Book(title, author, isbn)
                     library.add_book(new_book)
 
-                elif librarian_choice == "2":
+                elif librarian_choice == "3":
                     name = input("Enter the user's name: ")
                     new_user = User(len(library.users) + 1, name)
                     library.register_user(new_user)
 
-                elif librarian_choice == "3":
+                elif librarian_choice == "4":
                     library.display_books()
 
-                elif librarian_choice == "4":
+                elif librarian_choice == "5":
                     library.display_users()
 
-                elif librarian_choice == "5":
+                elif librarian_choice == "6":
                     library.generate_transaction_report()
 
-                elif librarian_choice == "6":
+                elif librarian_choice == "7":
                     print("Exiting the Librarian Menu.")
-                    break
+                    library.librarian_authenticated = False
 
                 else:
-                    print("Invalid choice. Please enter a number from 1 to 6.")
+                    print("Invalid choice. Please enter a number from 1 to 7.")
 
         else:
-            print("Invalid choice. Please type 'user', 'librarian', or 'exit'.")
-
+            print("Invalid choice. Please type 'user', 'librarian', or 'exit.'")
 
 if __name__ == "__main__":
     main()
