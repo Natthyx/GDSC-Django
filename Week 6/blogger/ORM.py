@@ -26,26 +26,41 @@ def query_and_display_posts(title_or_slug):
     print()
 
 
-
 def update_post_content(post_title, new_content):
-    post_to_update = Post.objects.get(title=post_title)
-    post_to_update.body = new_content
-    post_to_update.save()
+    posts_to_update = Post.objects.filter(title=post_title)
+    
+    if posts_to_update.count() == 1:
+        post_to_update = posts_to_update.first()
+        post_to_update.body = new_content
+        post_to_update.save()
+    elif posts_to_update.count() > 1:
+        print(f"Warning: Multiple posts found with title '{post_title}'. Skipping update.")
+    else:
+        print(f"Error: No posts found with title '{post_title}'. Update failed.")
+
 
 
 def delete_post(post_title):
-    Post.objects.get(title=post_title).delete()
+    posts_to_delete = Post.objects.filter(title=post_title)
+
+    if posts_to_delete.exists():
+        posts_to_delete.delete()
+        print(f"Deleted posts with title '{post_title}'.")
+    else:
+        print(f"No posts found with title '{post_title}'. Delete failed.")
+
+
 
 
 def create_comments():
-    comments_data = [
-        {'user': 'User 1', 'content': 'Comment for Post 1', 'post': Post.objects.get(title='Post 1')},
-        {'user': 'User 2', 'content': 'Comment for Post 2', 'post': Post.objects.get(title='Post 2')},
-        {'user': 'User 3', 'content': 'Comment for Post 3', 'post': Post.objects.get(title='Post 3')},
-    ]
+    # Create at least 3 comments related to different blog posts
+    posts = Post.objects.filter(title='Post 1')
 
-    for data in comments_data:
-        Comment.objects.create(**data)
+    for post in posts:
+        comment_data = {'user': 'User 1', 'content': f'Comment for {post.title}', 'post': post}
+        Comment.objects.create(**comment_data)
+
+    print("Comments created successfully.")
 
 
 def query_and_display_comments(post_title):
@@ -55,15 +70,25 @@ def query_and_display_comments(post_title):
         print(comment.content)
     print()
 
-
 def update_comment_content(comment_content, new_content):
-    comment_to_update = Comment.objects.get(content=comment_content)
-    comment_to_update.content = new_content
-    comment_to_update.save()
+    comments_to_update = Comment.objects.filter(content=comment_content)
+    
+    for comment in comments_to_update:
+        comment.content = new_content
+        comment.save()
+    
+    print(f"Updated content for comments with content '{comment_content}'.")
+
 
 
 def delete_comment(comment_content):
-    Comment.objects.get(content=comment_content).delete()
+    try:
+        comment_to_delete = Comment.objects.get(content=comment_content)
+        comment_to_delete.delete()
+        print(f"Deleted comment with content '{comment_content}'.")
+    except Comment.DoesNotExist:
+        print(f"Comment with content '{comment_content}' does not exist. Delete failed.")
+
 
 
 if __name__ == '__main__':
